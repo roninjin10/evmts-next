@@ -2,66 +2,75 @@
 
 import { Address, useAccount, useChainId, useContractRead } from "wagmi"
 
-import { WagmiMintExample } from "../../contracts/WagmiMintExample.sol"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+
+import { WagmiMintExample } from "@/contracts/WagmiMintExample.sol"
+import { addresses } from "@/lib/addresses"
 
 export const WagmiReads = () => {
-  const chainId = useChainId()
-
   const { address, isConnected } = useAccount()
+
+  const chainId = useChainId()
 
   const { data: balance } = useContractRead({
     /**
      * Spreading in a method will spread abi, address and args
      * Hover over balanceOf and click go-to-definition should take you to the method definition in solidity if compiling from solidity
      */
-    ...WagmiMintExample.read({ chainId }).balanceOf(address as Address),
+    ...WagmiMintExample.read.balanceOf(address as Address),
     enabled: isConnected,
   })
   const { data: totalSupply } = useContractRead({
-    ...WagmiMintExample.read({ chainId }).totalSupply(),
-    enabled: isConnected,
+    ...WagmiMintExample.read.totalSupply(),
+    address: addresses[WagmiMintExample.name][chainId as 1],
+    onError: console.error
   })
   const { data: symbol } = useContractRead({
-    ...WagmiMintExample.read({ chainId }).symbol(),
-    enabled: isConnected,
+    ...WagmiMintExample.read.symbol(),
+    address: addresses[WagmiMintExample.name][chainId as 1],
+    onError: console.error
   })
 
   return (
-    <div className={`flex flex-col gap-2`}>
-      <p className="text-2xl font-bold tracking-tighter">Reads</p>
-      <div
-        className={`flex w-full items-center rounded-md border bg-secondary p-2`}
-      >
-        <div className={`flex w-full justify-between`}>
-          <div className={``}>
-            client balanceOf(<span className={``}>{address}</span>
-            ):
-          </div>
-          <div className={``}>
-            <span className={``}>{balance?.toString()}</span>
-          </div>
-        </div>
-      </div>
-      <div
-        className={`flex w-full items-center rounded-md border bg-secondary p-2`}
-      >
-        <div className={`flex w-full justify-between`}>
-          <div className={``}>totalSupply():</div>
-          <div className={``}>
-            <span className={``}>{totalSupply?.toString()}</span>
-          </div>
-        </div>
-      </div>
-      <div
-        className={`flex w-full items-center rounded-md border bg-secondary p-2`}
-      >
-        <div className={`flex w-full justify-between`}>
-          <div className={``}>symbol():</div>
-          <div className={``}>
-            <span className={``}>{symbol?.toString()}</span>
-          </div>
-        </div>
-      </div>
-    </div>
+    <section className="flex flex-col gap-2">
+      <p className="text-3xl font-bold tracking-tighter">Reads</p>
+      <ul className={`flex flex-col gap-2`}>
+        <Card>
+          <CardHeader>
+            <CardTitle>balanceOf</CardTitle>
+            <CardDescription>
+              {address ? address : "Required: Connection"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p>{balance ? balance?.toString() : "Required: Connection"}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>totalSupply</CardTitle>
+            <CardDescription>WagmiMintExample</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p>{totalSupply?.toString()}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>symbol</CardTitle>
+            <CardDescription>ERC721 Ticker</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p>{symbol?.toString()}</p>
+          </CardContent>
+        </Card>
+      </ul>
+    </section>
   )
 }
